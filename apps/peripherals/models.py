@@ -1,23 +1,36 @@
 from django.db import models
+from .managers import ActionLogManager
 
-
-class AbstractPeripheral(models.Model):
+class PeripheralType(models.Model):
     name = models.CharField(max_length=30)
-    pin = models.IntegerField()
-    value = models.BooleanField(default=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    description = models.CharField(max_length=100, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
-    class Meta:
-        abstract = True
-    
+    def __str__(self):        
+        return '{} - {}'.format(self.name, self.is_active)
+
+
+class Peripheral(models.Model):
+    pin = models.IntegerField(primary_key=True)
+    name = models.CharField(max_length=30)
+    peripheral_type = models.ForeignKey(PeripheralType, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        return '{} - {}'.format(self.name, self.value)
+        return '{} - {}'.format(self.pin, self.name)
 
 
-class Gate(AbstractPeripheral):
-    pass
+class ActionLog(models.Model):
+    user_id = models.IntegerField()
+    user_username = models.CharField(max_length=50)
+    perfipheral_pin = models.IntegerField()
+    perfipheral_name = models.CharField(max_length=50)
+    perfipheral_type_id = models.IntegerField()
+    perfipheral_type_name = models.CharField(max_length=50)
+    perfipheral_created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    objects = models.Manager()
+    creation = ActionLogManager()
 
-class Lamp(AbstractPeripheral):
-    pass
+    def __str__(self):
+        return '{} - {} - {}'.format(self.user_username, self.perfipheral_type_name, self.perfipheral_name)
